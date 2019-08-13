@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: springboot-admin
+  profiles:
+    active:
+      - secure
+
+  boot:
+    admin:
+      ui:
+        # 修改网页显示的tab标题
+        title: "应用监控管理"
+        # 修改网页的brand的图标和标题
+        brand: "<img src='assets/img/icon-spring-boot-admin.svg'><span>应用监控管理</span>"
+
+# tag::configuration-eureka[]
+eureka:   #<1>
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    health-check-url-path: /actuator/health
+    metadata-map:
+      startup: ${random.int}    #needed to trigger info and endpoint update after restart
+  client:
+    registryFetchIntervalSeconds: 5
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVICE_URL:http://172.16.1.22:2221}/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  #<2>
+  endpoint:
+    health:
+      show-details: ALWAYS
+# end::configuration-eureka[]
+
+---
+spring:
+  profiles: insecure
+
+---
+spring:
+  profiles: secure
+  security:
+    user:
+      name: "user"
+      password: "password"
+eureka:
+  instance:
+    metadata-map:
+      user.name: "user"         #These two are needed so that the server
+      user.password: "password" #can access the protected client endpoints
